@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">PhysBasic</string>
+
+    <string name="app_name_with_index">PdfRendererBasic (%1$d/%2$d)</string>
+    <string name="info">Info</string>
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+
+
+    <string name="standart_text">Buy Standart</string>
+    <string name="premium_text">Buy Premium</string>
+    <string name="vip_text">Buy Vip</string>
+
+    <string name="standart_description">Standart Description</string>
+    <string name="premium_description">Premium Description</string>
+    <string name="vip_description">Vip Description</string>
+
+    <string name="standart_price">10 TL</string>
+    <string name="premium_price">20 TL</string>
+    <string name="vip_price">30 TL</string>
+
+</resources>

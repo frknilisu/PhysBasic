@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "1020581018105",
+    "firebase_url": "https://physbasic.firebaseio.com",
+    "project_id": "physbasic",
+    "storage_bucket": "physbasic.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1020581018105:android:f910746fcbfe74a6",
+        "android_client_info": {
+          "package_name": "com.frkn.physbasic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1020581018105-ocs20u3is5sdj8ub46172njrbulm2v9q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmqQ_bwW1HtJnn_RLMjf5m11ay5y2_Gq4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

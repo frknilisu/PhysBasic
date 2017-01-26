@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_tests"
+        android:enabled="true"
+        android:icon="@drawable/ic_notifications_black"
+        android:title="Tests"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_all_chapters"
+        android:enabled="true"
+        android:icon="@drawable/ic_home_black"
+        android:title="All Chapters"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_specials_problems"
+        android:enabled="true"
+        android:icon="@drawable/ic_search_black"
+        android:title="Specials Problems"
+        app:showAsAction="ifRoom" />
+</menu>
