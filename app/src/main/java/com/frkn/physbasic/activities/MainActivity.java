@@ -1,49 +1,33 @@
 package com.frkn.physbasic.activities;
 
-import android.Manifest;
-import android.app.DownloadManager;
-import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.frkn.physbasic.Chapter;
 import com.frkn.physbasic.R;
 import com.frkn.physbasic.Specials;
 import com.frkn.physbasic.Test;
 import com.frkn.physbasic.adapters.ChapterAdapter;
 import com.frkn.physbasic.adapters.SpecialsAdapter;
-import com.frkn.physbasic.helper.DividerItemDecoration;
-import com.frkn.physbasic.helper.Downloader;
-import com.frkn.physbasic.helper.RecyclerTouchListener;
 import com.frkn.physbasic.adapters.TestAdapter;
-import com.google.firebase.iid.FirebaseInstanceId;
+import com.frkn.physbasic.helper.DividerItemDecoration;
+import com.frkn.physbasic.helper.RecyclerTouchListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,7 +38,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -63,12 +46,10 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.fabric.sdk.android.Fabric;
-
 public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.BuyPremiumListener {
 
 
-    JSONObject inceptionJson = null;
+    public static JSONObject inceptionJson = null;
     int chaptersCount, testsCount, specialsCount;
 
     private List<Chapter> chapterList = new ArrayList<>();
@@ -86,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
     RecyclerView recyclerView;
     BottomNavigationView bottomNavigationView;
 
-    Downloader myDownloader;
+    int BUFFER_SIZE = 1024;
 
     /**
      * 0 => nothing show, just 3-4 chapter which come initially can be opened, other things are paid.
@@ -143,16 +124,14 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
                     }
                 });
 
-
     }
 
-    private void readInceptionJson(){
+    private void readInceptionJson() {
         try {
-            File f = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/PhysBasic/inception.json");
-            InputStream is = new FileInputStream(f);
+            FileInputStream fin = new FileInputStream(new File(this.getFilesDir(), "inception.json"));
             Writer writer = new StringWriter();
-            char[] buffer = new char[1024];
-            Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            char[] buffer = new char[BUFFER_SIZE];
+            Reader reader = new BufferedReader(new InputStreamReader(fin, "UTF-8"));
             int n;
             while ((n = reader.read(buffer)) != -1) {
                 writer.write(buffer, 0, n);
@@ -169,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
             jsonArray = inceptionJson.getJSONArray("specials");
             specialsCount = jsonArray.length();
         } catch (FileNotFoundException e) {
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -193,19 +173,19 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         }
     }
 
-    private void loadChaptersToRecycler(){
+    private void loadChaptersToRecycler() {
         loadChapterList();
         recyclerView.setAdapter(chapterAdapter);
         chapterAdapter.notifyDataSetChanged();
-        if(currentTouchListenerType == 1)
+        if (currentTouchListenerType == 1)
             return;
 
-        if(currentTouchListenerType == 2)
+        if (currentTouchListenerType == 2)
             recyclerView.removeOnItemTouchListener(testTouchListener);
-        else if(currentTouchListenerType == 3)
+        else if (currentTouchListenerType == 3)
             recyclerView.removeOnItemTouchListener(specialsTouchListener);
 
-        if(currentTouchListenerType != 1) {
+        if (currentTouchListenerType != 1) {
 
             chapterTouchListener = new RecyclerTouchListener(getApplicationContext(), recyclerView,
                     new RecyclerTouchListener.ClickListener() {
@@ -216,8 +196,7 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
                             if (accountType == 0 && chapter.isLock()) {
                                 openUpgradeDialog(1, chapter.getId(), chapter.getTitle(), "1 TL");
                             } else {
-                                //openChapter(chapter);
-                                openSelectedItem(1, chapter.getId(), chapter.getLength());
+                                openSelectedItem(1, chapter.getId(), chapter.getImageCount(), chapter.getFileLength());
                             }
                         }
 
@@ -245,19 +224,19 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         }
     }
 
-    private void loadTestsToRecycler(){
+    private void loadTestsToRecycler() {
         loadTestList();
         recyclerView.setAdapter(testAdapter);
         testAdapter.notifyDataSetChanged();
-        if(currentTouchListenerType == 2)
+        if (currentTouchListenerType == 2)
             return;
 
-        if(currentTouchListenerType == 1)
+        if (currentTouchListenerType == 1)
             recyclerView.removeOnItemTouchListener(chapterTouchListener);
-        else if(currentTouchListenerType == 3)
+        else if (currentTouchListenerType == 3)
             recyclerView.removeOnItemTouchListener(specialsTouchListener);
 
-        if(currentTouchListenerType != 2) {
+        if (currentTouchListenerType != 2) {
 
             testTouchListener = new RecyclerTouchListener(getApplicationContext(), recyclerView,
                     new RecyclerTouchListener.ClickListener() {
@@ -268,8 +247,7 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
                             if (accountType <= 1) {
                                 openUpgradeDialog(2, test.getId(), test.getTitle(), "2 TL");
                             } else {
-                                openSelectedItem(2, test.getId(), 10);
-                                //openChapter(test);
+                                //openSelectedItem(2, test.getId(), 10);
                             }
                         }
 
@@ -297,19 +275,19 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         }
     }
 
-    private void loadSpecialsToRecycler(){
+    private void loadSpecialsToRecycler() {
         loadSpecialList();
         recyclerView.setAdapter(specialsAdapter);
         specialsAdapter.notifyDataSetChanged();
-        if(currentTouchListenerType == 3)
+        if (currentTouchListenerType == 3)
             return;
 
-        if(currentTouchListenerType == 1)
+        if (currentTouchListenerType == 1)
             recyclerView.removeOnItemTouchListener(chapterTouchListener);
-        else if(currentTouchListenerType == 2)
+        else if (currentTouchListenerType == 2)
             recyclerView.removeOnItemTouchListener(testTouchListener);
 
-        if(currentTouchListenerType != 3) {
+        if (currentTouchListenerType != 3) {
 
             specialsTouchListener = new RecyclerTouchListener(getApplicationContext(), recyclerView,
                     new RecyclerTouchListener.ClickListener() {
@@ -320,8 +298,7 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
                             if (accountType <= 2) {
                                 openUpgradeDialog(3, specials.getId(), specials.getTitle(), "3 TL");
                             } else {
-                                //openChapter(test);
-                                openSelectedItem(3, specials.getId(), 10);
+                                //openSelectedItem(3, specials.getId(), 10);
                             }
                         }
 
@@ -339,22 +316,15 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
 
     public final static String EXTRA_MESSAGE = "com.frkn.physbasic.MESSAGE";
 
-    private void openChapter(Chapter chapter) {
-        Log.d("openChapter", "chapterId: " + chapter.getId());
-        Intent intent = new Intent(MainActivity.this, ShowChapter.class);
-        intent.putExtra(EXTRA_MESSAGE + "_chapterId", String.valueOf(chapter.getId()));
-        startActivity(intent);
-    }
-
-    private void openSelectedItem(int type, int id, int length) {
-        Log.d("openSelectedItem", "type: " + type + ", id: " + id + ", length: " + length);
+    private void openSelectedItem(int type, int id, int imgCount, int fileLength) {
+        Log.d("openSelectedItem", "type: " + type + ", id: " + id + ", imgCount: " + imgCount + ", fileLength: " + fileLength);
         Intent intent = new Intent(MainActivity.this, ShowImages.class);
         intent.putExtra(EXTRA_MESSAGE + "_type", String.valueOf(type));
         intent.putExtra(EXTRA_MESSAGE + "_id", String.valueOf(id));
-        intent.putExtra(EXTRA_MESSAGE + "_length", String.valueOf(length));
+        intent.putExtra(EXTRA_MESSAGE + "_imageCount", String.valueOf(imgCount));
+        intent.putExtra(EXTRA_MESSAGE + "_fileLength", String.valueOf(fileLength));
         startActivity(intent);
     }
-
 
     /*************************************************************************************
      * Open Fragments
@@ -374,16 +344,6 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         dialogFragment.show(fm, "Buy Premium");
     }
 
-
-    private void openDownloadDialog(){
-        dialogFragment = new BuyPremiumDialog();
-        Bundle args = new Bundle();
-        args.putInt("accountType", accountType);
-        dialogFragment.setArguments(args);
-        FragmentManager fm = getSupportFragmentManager();
-        dialogFragment.show(fm, "Downloads");
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         dialogFragment.onActivityResult(requestCode, resultCode, data);
@@ -392,155 +352,10 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
 
     @Override
     public void onFinishBuying(int _accountType, int _type, int _id) {
-        int old_account_type = accountType;
         accountType = _accountType;
         Log.d("onFinishBuying", "accountType: " + accountType);
-        saveSettings(accountType);
-        if(old_account_type == 0){
-            if(accountType == 0 && _type != -1 && _id != -1) {
-                initializeDownloading();
-                dowload_one_Chapter(_id);
-            }
-            if(accountType >= 1) {
-                initializeDownloading();
-                dowload_all_Chapters();
-            }
-            if(accountType >= 2) {
-                initializeDownloading();
-                dowload_all_Tests();
-            }
-            if(accountType >= 3) {
-                initializeDownloading();
-                dowload_all_Specials();
-            }
-        } else if(old_account_type == 1){
-            if(accountType == 1 && _type != -1 && _id != -1) {
-                initializeDownloading();
-                dowload_one_Test(_id);
-            }
-            if(accountType >= 2) {
-                initializeDownloading();
-                dowload_all_Tests();
-            }
-            if(accountType >= 3) {
-                initializeDownloading();
-                dowload_all_Specials();
-            }
-        } else if(old_account_type == 2){
-            if(accountType == 2 && _type != -1 && _id != -1) {
-                initializeDownloading();
-                dowload_one_Special(_id);
-            }
-            if(accountType >= 3) {
-                initializeDownloading();
-                dowload_all_Specials();
-            }
-        }
+        saveSettings();
     }
-
-    ProgressDialog progress;
-    private void initializeDownloading(){
-        IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-        registerReceiver(downloadReceiver, filter);
-        progress = new ProgressDialog(this);
-        progress.setMessage("Downloading.. :) ");
-        progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progress.setIndeterminate(true);
-        progress.setCancelable(false);
-        progress.setProgress(0);
-        progress.show();
-    }
-
-    private void dowload_all_Chapters(){
-        String link = "https://www.dropbox.com/sh/z2n6pwz0e0i3n62/AACe-gTieVydGjf2ggtoXzeZa?dl=1";
-        myDownloader = new Downloader();
-        myDownloader.setContext(getApplicationContext());
-        myDownloader.setDownloadLink(link);
-        myDownloader.setBroadcastReceiver(downloadReceiver);
-        myDownloader.setPath(Environment.DIRECTORY_DOWNLOADS + "/PhysBasic");
-        myDownloader.setFilename("closeChapters.zip");
-        myDownloader.startDownload();
-    }
-
-    private void dowload_all_Tests(){
-        String link = "";
-        myDownloader = new Downloader();
-        myDownloader.setContext(getApplicationContext());
-        myDownloader.setDownloadLink(link);
-        myDownloader.setBroadcastReceiver(downloadReceiver);
-        myDownloader.setPath(Environment.DIRECTORY_DOWNLOADS + "/PhysBasic");
-        myDownloader.setFilename("tests.zip");
-        myDownloader.startDownload();
-    }
-
-    private void dowload_all_Specials(){
-        String link = "";
-        myDownloader = new Downloader();
-        myDownloader.setContext(getApplicationContext());
-        myDownloader.setDownloadLink(link);
-        myDownloader.setBroadcastReceiver(downloadReceiver);
-        myDownloader.setPath(Environment.DIRECTORY_DOWNLOADS + "/PhysBasic");
-        myDownloader.setFilename("specials.zip");
-        myDownloader.startDownload();
-    }
-
-    private void dowload_one_Chapter(int id){
-        myDownloader = new Downloader();
-        myDownloader.setContext(getApplicationContext());
-        myDownloader.setDownloadLink(chapterList.get(id-1).getLink());
-        myDownloader.setBroadcastReceiver(downloadReceiver);
-        myDownloader.setPath(Environment.DIRECTORY_DOWNLOADS + "/PhysBasic/chapters");
-        myDownloader.setFilename(id + ".zip");
-        myDownloader.startDownload();
-    }
-
-    private void dowload_one_Test(int id){
-        myDownloader = new Downloader();
-        myDownloader.setContext(getApplicationContext());
-        //myDownloader.setDownloadLink(testList.get(id-1).getLink());
-        myDownloader.setBroadcastReceiver(downloadReceiver);
-        myDownloader.setPath(Environment.DIRECTORY_DOWNLOADS + "/PhysBasic/tests");
-        myDownloader.setFilename(id + ".zip");
-        myDownloader.startDownload();
-    }
-
-    private void dowload_one_Special(int id){
-        myDownloader = new Downloader();
-        myDownloader.setContext(getApplicationContext());
-        //myDownloader.setDownloadLink(specialsList.get(id-1).getLink());
-        myDownloader.setBroadcastReceiver(downloadReceiver);
-        myDownloader.setPath(Environment.DIRECTORY_DOWNLOADS + "/PhysBasic/specials");
-        myDownloader.setFilename(id + ".zip");
-        myDownloader.startDownload();
-    }
-
-    private BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            //check if the broadcast message is for our Enqueued download
-
-            long referenceId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-            Log.d("Extra", "ReferenceId: " + referenceId);
-            if (myDownloader.downloadReference == referenceId) {
-                //CheckDwnloadStatus(referenceId);
-                progress.dismiss();
-                Toast toast = Toast.makeText(getApplicationContext(),
-                        "Downloading of data just finished", Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.TOP, 25, 400);
-                toast.show();
-                String downloadsPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
-                String srcPath = downloadsPath + "/PhysBasic/closeChapters.zip";
-                String destPath = downloadsPath + "/PhysBasic/";
-                myDownloader.unzip(srcPath, destPath);
-                saveSettings(accountType);
-                unregisterReceiver(this);
-            }
-        }
-
-
-    };
 
 
     /*************************************************************************************
@@ -549,16 +364,11 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
     private static final String PREFS_NAME = "MySharedPrefName";
     SharedPreferences settings;
 
-    private boolean checkPermissionWithSharedPref() {
-        settings = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        return settings.getBoolean("Permissions", false);
-    }
-
-    private void saveSettings(int _accountType) {
+    private void saveSettings() {
         SharedPreferences.Editor editor;
         settings = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         editor = settings.edit();
-        editor.putInt("accountType", _accountType);
+        editor.putInt("accountType", accountType);
         editor.putBoolean("firstTime", false);
         editor.commit();
     }
@@ -567,7 +377,6 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         settings = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         accountType = settings.getInt("accountType", 0);
     }
-
 
     /*************************************************************************************
      * Toolbar Menu

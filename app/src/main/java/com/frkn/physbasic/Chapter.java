@@ -12,7 +12,8 @@ public class Chapter {
     private int imageId;
     private String title, definition;
     private boolean lock;
-    private int length;
+    private int imageCount;
+    private int fileLength;
     private String link;
 
 
@@ -23,7 +24,8 @@ public class Chapter {
             this.definition = jsonObject.getString("definition");
             this.title = jsonObject.getString("title");
             this.lock = jsonObject.getBoolean("lock");
-            this.length = jsonObject.getInt("length");
+            this.imageCount = jsonObject.getInt("imageCount");
+            this.fileLength = jsonObject.getInt("fileLength");
             this.link = jsonObject.getString("link");
         } catch (JSONException e) {
             e.printStackTrace();
@@ -50,9 +52,15 @@ public class Chapter {
         return lock;
     }
 
-    public int getLength() {
-        return length;
+    public int getImageCount() {
+        return imageCount;
     }
 
-    public String getLink() { return link; }
+    public int getFileLength() {
+        return fileLength;
+    }
+
+    public String getLink() {
+        return link;
+    }
 }

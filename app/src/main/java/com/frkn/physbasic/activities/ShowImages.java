@@ -1,12 +1,14 @@
 package com.frkn.physbasic.activities;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Environment;
-import android.support.v7.app.AppCompatActivity;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
@@ -19,14 +21,14 @@ import android.widget.LinearLayout;
 import android.widget.ViewSwitcher;
 
 import com.frkn.physbasic.R;
+import com.frkn.physbasic.helper.DownloaderAsync;
+
+import org.json.JSONException;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ShowImages extends AppCompatActivity {
 
@@ -35,13 +37,14 @@ public class ShowImages extends AppCompatActivity {
     ImageSwitcher imageSwitcher = null;
     Button prev, next;
     int currImage = 1;
-    int animInDuration = 1000;
-    int animOutDuration = 700;
+    int animInDuration = 800;
+    int animOutDuration = 500;
     String alpha = "1.0";
 
-    int type, id, imgCount;
+    int type, id, imageCount, fileLength;
+    String typeAsString;
+    String URL = null;
 
-    String imagesPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,29 +53,35 @@ public class ShowImages extends AppCompatActivity {
 
         type = Integer.parseInt(getIntent().getExtras().getString(EXTRA_MESSAGE + "_type"));
         id = Integer.parseInt(getIntent().getExtras().getString(EXTRA_MESSAGE + "_id"));
-        imgCount = Integer.parseInt(getIntent().getExtras().getString(EXTRA_MESSAGE + "_length"));
+        imageCount = Integer.parseInt(getIntent().getExtras().getString(EXTRA_MESSAGE + "_imageCount"));
+        fileLength = Integer.parseInt(getIntent().getExtras().getString(EXTRA_MESSAGE + "_fileLength"));
 
-        switch (type){
+        Log.d("ShowImages", "type: " + type);
+        Log.d("ShowImages", "id: " + id);
+        Log.d("ShowImages", "imageCount: " + imageCount);
+        Log.d("ShowImages", "fileLength: " + fileLength);
+
+        switch (type) {
             case 1:
-                imagesPath += "/PhysBasic/chapters/";
+                typeAsString = "chapters";
                 break;
             case 2:
-                imagesPath += "/PhysBasic/tests/";
+                typeAsString = "tests";
                 break;
             case 3:
-                imagesPath += "/PhysBasic/specials/";
+                typeAsString = "specials";
                 break;
             default:
-                imagesPath += "/PhysBasic/chapters/";
+                typeAsString = "chapters";
                 break;
         }
-        imagesPath += id + "/";
 
         initializeImageSwitcher();
-        Log.d("imgCount", String.valueOf(imgCount));
-        setInitialImage();
-        updateUi();
-        setButtonsClick();
+        if (openFolder()) {
+            setInitialImage();
+            updateUi();
+            setButtonsClick();
+        }
     }
 
     private void initializeImageSwitcher() {
@@ -122,7 +131,7 @@ public class ShowImages extends AppCompatActivity {
 
     private void updateUi() {
         prev.setEnabled(currImage > 1);
-        next.setEnabled(currImage < imgCount);
+        next.setEnabled(currImage < imageCount);
         //this.setTitle(getString(R.string.app_name_with_index, currImage, pageCount));
     }
 
@@ -145,19 +154,19 @@ public class ShowImages extends AppCompatActivity {
         int width = thumbnail.getWidth();
         int height = thumbnail.getHeight();
 
-        if(scaledDensity<1){
+        if (scaledDensity < 1) {
 
-            width = (int) (width *scaledDensity);
-            height = (int) (height *scaledDensity);
-        }else{
-            width = (int) (width +width *(scaledDensity-1));
-            height = (int) (height +height *(scaledDensity-1));
+            width = (int) (width * scaledDensity);
+            height = (int) (height * scaledDensity);
+        } else {
+            width = (int) (width + width * (scaledDensity - 1));
+            height = (int) (height + height * (scaledDensity - 1));
         }
 
         Log.d("Density", "width: " + width);
         Log.d("Density", "height: " + height);
         thumbnail = Bitmap.createScaledBitmap(thumbnail, width, height, true);
-        Drawable d = new BitmapDrawable(getResources(),thumbnail);
+        Drawable d = new BitmapDrawable(getResources(), thumbnail);
 
         return d;
 
@@ -165,11 +174,64 @@ public class ShowImages extends AppCompatActivity {
 
     private void setCurrentImage() {
         try {
-            InputStream is = new FileInputStream(new File(imagesPath + "img" + currImage + ".jpg"));
+            //  /data/user/0/com.frkn.physbasic/files/chapter/1
+            InputStream is = new FileInputStream(new File(this.getFilesDir(), typeAsString + "/xx" + id + "/img" + currImage + ".jpg"));
             imageSwitcher.setImageDrawable(getDrawableForIns(is));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         // set image to ImageView
+    }
+
+    private boolean openFolder() {
+        Log.d("ShowImages", "openFolder()");
+        File chaptersFolder = new File(this.getFilesDir(), typeAsString);
+        File chapterIdFolder = new File(chaptersFolder, "xx" + id);
+        if (!chapterIdFolder.exists()) {
+            try {
+                URL = MainActivity.inceptionJson.getJSONArray(typeAsString).getJSONObject(id - 1).getString("link");
+                Log.d("ShowImages", "url: " + URL);
+                download_one_chapter();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return false;
+        } else {
+            Log.d("openFolder", "file already exist");
+            return true;
+        }
+    }
+
+    public void download_one_chapter() {
+        Log.d("Functions", "download_one_chapter()..");
+        DownloaderAsync downloaderAsync = new DownloaderAsync();
+        downloaderAsync.setContext(ShowImages.this);
+        downloaderAsync.setListener(onTaskCompleted);
+        downloaderAsync.setProcessMessage("Downloading Chapter-" + id + "..");
+        downloaderAsync.setParentFolderName(typeAsString);
+        downloaderAsync.setFileName("xx" + id);
+        downloaderAsync.setFileExtension(".zip");
+        downloaderAsync.setFileLength(fileLength);
+        if (isOnline()) {
+            Log.d("isOnline", "Your are online. Now can start download");
+            downloaderAsync.execute(URL);
+        }
+    }
+
+    DownloaderAsync.OnTaskCompleted onTaskCompleted = new DownloaderAsync.OnTaskCompleted() {
+        @Override
+        public void onTaskCompleted(String response) {
+            Log.d("ShowImages", "onTaskCompleted: " + response);
+            setInitialImage();
+            updateUi();
+            setButtonsClick();
+        }
+    };
+
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 }

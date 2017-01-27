@@ -1,26 +1,22 @@
 package com.frkn.physbasic.helper;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.util.Log;
-import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.frkn.physbasic.activities.MainActivity;
-
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
-
-import static com.frkn.physbasic.R.id.imageView;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * Created by frkn on 26.01.2017.
@@ -29,30 +25,31 @@ import static com.frkn.physbasic.R.id.imageView;
 public class DownloaderAsync extends AsyncTask<String, String, String> {
 
     ProgressDialog mProgressDialog;
+
     Context context;
-
     OnTaskCompleted listener;
+    String processMessage;
+    int fileLength = 0;
+    String parentFolderName;
+    String fileName, fileExtension;
 
-    public DownloaderAsync(Context _context, OnTaskCompleted _listener) {
-        this.context = _context;
-        this.listener = _listener;
+    String srcPath, destPath;
+
+    public DownloaderAsync() {
     }
+
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        // Create a progressdialog
         mProgressDialog = new ProgressDialog(context);
-        // Set progressdialog title
         mProgressDialog.setTitle("DownloaderAsync");
-        // Set progressdialog message
-        mProgressDialog.setMessage("Downloading...");
+        mProgressDialog.setMessage(processMessage);
         mProgressDialog.setIndeterminate(false);
-        mProgressDialog.setMax(100);
         mProgressDialog.setProgress(0);
+        mProgressDialog.setMax(100);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mProgressDialog.setCancelable(false);
-        // Show progressdialog
         mProgressDialog.show();
     }
 
@@ -61,23 +58,47 @@ public class DownloaderAsync extends AsyncTask<String, String, String> {
         int count;
         try {
             URL url = new URL(fileUrl[0]);
-            HttpURLConnection urlConnection = (HttpURLConnection)url.openConnection();
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
-            urlConnection.setDoOutput(true);
-            urlConnection.setChunkedStreamingMode(100);
+            //urlConnection.setDoOutput(true);
+            urlConnection.setConnectTimeout(10000);
+            urlConnection.setReadTimeout(10000);
+            //urlConnection.setChunkedStreamingMode(100);
             urlConnection.connect();
             // show progress bar 0-100%
-            int fileLength = urlConnection.getContentLength();
             Log.d("doInBack", "fileLength: " + fileLength);
-            InputStream inputStream = new BufferedInputStream(url.openStream(), 8192);
-            OutputStream outputStream = new FileOutputStream(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/2.zip");
+            Log.d("doInBack", "responseCode: " + urlConnection.getResponseCode());
+            Log.d("doInBack", "responseMessage: " + urlConnection.getResponseMessage());
+            Log.d("doInBack", "requestMethod: " + urlConnection.getRequestMethod());
+            Log.d("doInBack", "contentType: " + urlConnection.getContentType());
+            Log.d("doInBack", "contentEncoding: " + urlConnection.getContentEncoding());
+            InputStream inputStream = new BufferedInputStream(url.openStream(), 65536);
+            //InputStream inputStream = urlConnection.getInputStream();
+            OutputStream outputStream = null;
+            if (parentFolderName != null) {
+                File file = new File(context.getFilesDir(), parentFolderName);
+                file.mkdirs();
+                File file2 = File.createTempFile(fileName, fileExtension, file);
+                Log.d("doInBackGround", "downloadPath: " + file2.getAbsolutePath());
+                srcPath = file2.getAbsolutePath();
+                destPath = file.getAbsolutePath() + "/" + fileName + "/";
+                outputStream = new FileOutputStream(file2);
+            } else {
+                File file = new File(context.getFilesDir(), "inception.json");
+                file.createNewFile();
+                Log.d("doInBackGround", "downloadPath: " + file.getAbsolutePath());
+                outputStream = new FileOutputStream(file);
+                srcPath = null;
+                destPath = null;
+            }
 
-            byte data[] = new byte[1024];
+
+            byte data[] = new byte[BUFFER_SIZE];
             long total = 0;
             while ((count = inputStream.read(data)) != -1) {
                 total += count;
                 Log.d("Total", "tot: " + total);
-                publishProgress("" + (int) ((total) / (fileLength*24)));
+                publishProgress("" + (int) ((total * 100) / (fileLength)));
                 outputStream.write(data, 0, count);
             }
             // flushing output
@@ -93,7 +114,6 @@ public class DownloaderAsync extends AsyncTask<String, String, String> {
     }
 
     protected void onProgressUpdate(String... progress) {
-        // progress percentage
         Log.d("onProgressUpdate", progress[0]);
         mProgressDialog.setProgress(Integer.parseInt(progress[0]));
     }
@@ -102,17 +122,124 @@ public class DownloaderAsync extends AsyncTask<String, String, String> {
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
         mProgressDialog.dismiss();
-        Toast.makeText(context, "Download completed.", Toast.LENGTH_SHORT).show();
-        listener.onTaskCompleted("");
+        Toast.makeText(context, "Success: Download completed.", Toast.LENGTH_SHORT).show();
+        boolean flag = false;
+        if (srcPath != null && destPath != null)
+            flag = unzip(srcPath, destPath);
+        Toast.makeText(context, "Unzipping: " + String.valueOf(flag), Toast.LENGTH_SHORT).show();
+        listener.onTaskCompleted("Success: Download completed.");
     }
 
     @Override
     protected void onCancelled(String result) {
         super.onCancelled(result);
-        listener.onTaskCompleted("Error: Download Failed. Please retry!");
+        Toast.makeText(context, "Error: Download failed.", Toast.LENGTH_SHORT).show();
+        listener.onTaskCompleted("Error: Download failed.");
     }
 
     public interface OnTaskCompleted {
         void onTaskCompleted(String response);
+    }
+
+    private final static int BUFFER_SIZE = 2048;
+    private final static String ZIP_EXTENSION = ".zip";
+
+    public boolean unzip(String srcZipFileName, String destDirectoryName) {
+        Log.d("unzip", "src: " + srcZipFileName + ", dest: " + destDirectoryName);
+        try {
+            BufferedInputStream bufIS = null;
+            // create the destination directory structure (if needed)
+            File destDirectory = new File(destDirectoryName);
+            Log.d("unzip", "destName: " + destDirectory.getName());
+            destDirectory.mkdirs();
+            Log.d("unzip", "destPath: " + destDirectory.getAbsolutePath());
+            Log.d("unzip", "dest.isExist(): " + destDirectory.exists());
+
+            // open archive for reading
+            File srcFile = new File(srcZipFileName);
+            ZipFile zipFile = new ZipFile(srcFile, ZipFile.OPEN_READ);
+
+            //for every zip archive entry do
+            Enumeration<? extends ZipEntry> zipFileEntries = zipFile.entries();
+            while (zipFileEntries.hasMoreElements()) {
+                ZipEntry entry = (ZipEntry) zipFileEntries.nextElement();
+                System.out.println("\tExtracting entry: " + entry);
+
+                //create destination file
+                File destFile = new File(destDirectory, entry.getName());
+                destFile.createNewFile();
+                //File destFile = File.createTempFile(destDirectory.getAbsolutePath(), entry.getName());
+                Log.d("unzip", "destFile: " + destFile.getAbsolutePath() + ", dir: " + destFile.isDirectory());
+
+                //create parent directories if needed
+                File parentDestFile = destFile.getParentFile();
+                parentDestFile.mkdirs();
+
+                if (!entry.isDirectory()) {
+                    bufIS = new BufferedInputStream(
+                            zipFile.getInputStream(entry));
+                    int currentByte;
+
+                    // buffer for writing file
+                    byte data[] = new byte[BUFFER_SIZE];
+
+                    // write the current file to disk
+                    FileOutputStream fOS = new FileOutputStream(destFile);
+                    BufferedOutputStream bufOS = new BufferedOutputStream(fOS, BUFFER_SIZE);
+
+                    while ((currentByte = bufIS.read(data, 0, BUFFER_SIZE)) != -1) {
+                        bufOS.write(data, 0, currentByte);
+                    }
+
+                    // close BufferedOutputStream
+                    bufOS.flush();
+                    bufOS.close();
+
+                    // recursively unzip files
+                    if (entry.getName().toLowerCase().endsWith(ZIP_EXTENSION)) {
+                        String zipFilePath = destDirectory.getPath() + File.separatorChar + entry.getName();
+
+                        unzip(zipFilePath, zipFilePath.substring(0, zipFilePath.length() - ZIP_EXTENSION.length()));
+                    }
+                }
+            }
+            bufIS.close();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /************************************************************
+     * SETTERS
+     ************************************************************/
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public void setListener(OnTaskCompleted listener) {
+        this.listener = listener;
+    }
+
+    public void setProcessMessage(String processMessage) {
+        this.processMessage = processMessage;
+    }
+
+    public void setFileLength(int fileLength) {
+        this.fileLength = fileLength;
+    }
+
+    public void setParentFolderName(String parentFolderName) {
+        this.parentFolderName = parentFolderName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public void setFileExtension(String fileExtension) {
+        this.fileExtension = fileExtension;
     }
 }
