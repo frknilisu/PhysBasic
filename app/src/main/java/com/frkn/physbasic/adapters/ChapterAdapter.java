@@ -1,6 +1,7 @@
 package com.frkn.physbasic.adapters;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,9 @@ import java.util.List;
 public class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.MyViewHolder> {
 
     private List<Chapter> chapterList;
+    public static final int ITEM_UNLOCKED = 0;
+    public static final int ITEM_LOCKED = 1;
+    private int accountType = 0;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public ImageView image;
@@ -36,10 +40,20 @@ public class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.MyViewHo
         this.chapterList = chapterList;
     }
 
+    public void setAccountType(int _accountType) {
+        this.accountType = _accountType;
+    }
+
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_row, parent, false);
+        /*if(viewType == 1 && accountType == 0) {
+            itemView.setBackgroundResource(R.drawable.images2);
+        } else{
+            itemView.setBackgroundResource(R.drawable.images);
+        }*/
 
         return new MyViewHolder(itemView);
     }
@@ -57,7 +71,11 @@ public class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.MyViewHo
         return chapterList.size();
     }
 
-    public String getAdapterName(){
-        return "ChapterAdapter";
+    @Override
+    public int getItemViewType(int position) {
+        if(chapterList.get(position).isLock())
+            return ITEM_LOCKED;
+        else
+            return ITEM_UNLOCKED;
     }
 }

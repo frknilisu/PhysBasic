@@ -68,8 +68,7 @@
         android:layout_below="@+id/button3"
         android:layout_toLeftOf="@+id/button3"
         android:layout_toStartOf="@+id/button3"
-        android:id="@+id/button4"
-        android:background="@drawable/ripple_effect"/>
+        android:id="@+id/button4" />
 
     <TextView
         android:text="TextView"

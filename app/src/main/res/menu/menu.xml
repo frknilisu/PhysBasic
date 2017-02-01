@@ -7,8 +7,14 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/option_about"
+        android:id="@+id/option_güncelle"
         android:orderInCategory="2"
+        android:title="Güncelle"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/option_about"
+        android:orderInCategory="3"
         android:title="About"
         app:showAsAction="never" />
 

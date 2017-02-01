@@ -1,6 +1,7 @@
 package com.frkn.physbasic.helper;
 
 import android.app.Activity;
+import android.content.Context;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
@@ -34,12 +35,14 @@ public class RestorePurchase {
 
     RestorePurchase.RestorePurchaseListener restorePurchaseListener;
     Activity activity;
+    Context context;
 
     int accountType = 0, type = -1, id = -1;
     String title, price;
 
-    public RestorePurchase(Activity _activity, RestorePurchase.RestorePurchaseListener _listener) {
+    public RestorePurchase(Activity _activity, Context _context, RestorePurchase.RestorePurchaseListener _listener) {
         this.activity = _activity;
+        this.context = _context;
         this.restorePurchaseListener = _listener;
     }
 
@@ -202,14 +205,17 @@ public class RestorePurchase {
     }
 
     private void alert(String message) {
-        AlertDialog.Builder bld = new AlertDialog.Builder(activity.getBaseContext());
+        AlertDialog.Builder bld = new AlertDialog.Builder(context);
         bld.setMessage(message);
         bld.setNeutralButton("OK", null);
         Log.d(TAG, "Showing alert dialog: " + message);
         bld.create().show();
+        restorePurchaseListener.onRestoreFailed(message);
     }
 
     public interface RestorePurchaseListener {
         void onRestoreCompleted(int _accountType, int _type, int _id);
+        void onRestoreFailed(String response);
     }
+
 }

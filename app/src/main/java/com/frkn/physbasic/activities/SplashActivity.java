@@ -5,11 +5,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.multidex.MultiDex;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,6 +20,7 @@ import com.crashlytics.android.Crashlytics;
 import com.frkn.physbasic.R;
 import com.frkn.physbasic.helper.DownloaderAsync;
 import com.frkn.physbasic.helper.RestorePurchase;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -45,6 +49,10 @@ public class SplashActivity extends AppCompatActivity {
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_splash);
 
+
+        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+        Log.d("SplashActivity", "Refreshed token: " + refreshedToken);;
+        Log.d("SplashActivity", "int: " + R.drawable.thermomet2);
         setup();
     }
 
@@ -55,7 +63,7 @@ public class SplashActivity extends AppCompatActivity {
             if (isOnline()) {
                 //do you want to restore purchase?
                 Log.d("SplashActivity", "restorePurchase()..");
-                RestorePurchase restorePurchase = new RestorePurchase(this, new RestorePurchase.RestorePurchaseListener() {
+                RestorePurchase restorePurchase = new RestorePurchase(this, SplashActivity.this, new RestorePurchase.RestorePurchaseListener() {
                     @Override
                     public void onRestoreCompleted(int _accountType, int _type, int _id) {
                         Log.d("SplashActivity", "onRestoreCompleted()");
@@ -65,24 +73,30 @@ public class SplashActivity extends AppCompatActivity {
                                 "You have " + accountTypeNames() + " account", Toast.LENGTH_SHORT).show();
                         reloadInception();
                     }
+
+                    @Override
+                    public void onRestoreFailed(String response) {
+                        Log.d("SplashActivity", "onRestoreFailed()");
+                        Toast.makeText(getApplicationContext(),
+                                "Restore Purchase failed: " + response + "\n" + "Check your internet connection!",
+                                Toast.LENGTH_SHORT).show();
+                        reloadInception();
+                    }
                 });
                 restorePurchase.restore();
+                //reloadInception();
             } else {
                 TextView txt = (TextView) findViewById(R.id.textView2);
                 txt.setText("App cannot start because of internet connection!");
             }
         } else {
-            if (isOnline()) {
-                reloadInception();
-            } else {
-                new Handler().postDelayed(new Runnable() {
+            new Handler().postDelayed(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        startMainActivity();
-                    }
-                }, SPLASH_TIME_OUT);
-            }
+                @Override
+                public void run() {
+                    startMainActivity();
+                }
+            }, SPLASH_TIME_OUT);
         }
     }
 
@@ -138,7 +152,7 @@ public class SplashActivity extends AppCompatActivity {
         downloaderAsync.setParentFolderName(null);
         downloaderAsync.setFileName("inception");
         downloaderAsync.setFileExtension(".json");
-        downloaderAsync.setFileLength(1464);
+        downloaderAsync.setFileLength(2607);
         if (isOnline()) {
             Log.d("isOnline", "Your are online. Now can start download");
             downloaderAsync.execute(URL);

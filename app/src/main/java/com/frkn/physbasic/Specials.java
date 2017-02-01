@@ -1,5 +1,7 @@
 package com.frkn.physbasic;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,6 +14,9 @@ public class Specials {
     private int id;
     private int imageId;
     private String title, definition;
+    private int imageCount;
+    private int fileLength;
+    private String link;
 
     public Specials(JSONObject jsonObject) {
         try {
@@ -19,6 +24,9 @@ public class Specials {
             this.imageId = Integer.parseInt(jsonObject.getString("imageId"));
             this.definition = jsonObject.getString("definition");
             this.title = jsonObject.getString("title");
+            this.imageCount = jsonObject.getInt("imageCount");
+            this.fileLength = jsonObject.getInt("fileLength");
+            this.link = jsonObject.getString("link");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -40,4 +48,15 @@ public class Specials {
         return definition;
     }
 
+    public int getImageCount() {
+        return imageCount;
+    }
+
+    public int getFileLength() {
+        return fileLength;
+    }
+
+    public String getLink() {
+        return link;
+    }
 }

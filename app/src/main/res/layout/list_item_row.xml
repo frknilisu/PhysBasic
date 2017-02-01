@@ -2,31 +2,34 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="75dp"
     android:focusable="true"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
     android:paddingTop="10dp"
     android:paddingBottom="10dp"
     android:clickable="true"
-    android:background="@drawable/ripple_effect">
+    android:background="@drawable/layout_shape"
+    android:weightSum="5">
 
     <ImageView
         android:id="@+id/image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"/>
 
 
     <LinearLayout
         android:orientation="vertical"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_weight="4"
         android:paddingLeft="16dp">
 
         <TextView
             android:id="@+id/title"
-            android:textColor="@color/titleColor"
             android:textSize="16dp"
+            android:textColor="@color/active_item_title"
             android:textStyle="bold"
             android:layout_alignParentTop="true"
             android:layout_width="match_parent"
@@ -34,8 +37,8 @@
 
         <TextView
             android:id="@+id/definition"
-            android:textColor="@color/definitonColor"
             android:layout_below="@id/title"
+            android:textColor="@color/active_item_definition"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

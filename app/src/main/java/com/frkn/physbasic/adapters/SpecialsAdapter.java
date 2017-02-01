@@ -19,6 +19,7 @@ import java.util.List;
 public class SpecialsAdapter extends RecyclerView.Adapter<SpecialsAdapter.MyViewHolder> {
     
     private List<Specials> specialList;
+    private int accountType;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public ImageView image;
@@ -36,10 +37,19 @@ public class SpecialsAdapter extends RecyclerView.Adapter<SpecialsAdapter.MyView
         this.specialList = specialList;
     }
 
+    public void setAccountType(int _accountType){
+        this.accountType = _accountType;
+    }
+
     @Override
     public SpecialsAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_row, parent, false);
+        if(accountType  == 3){
+            itemView.setBackgroundResource(R.drawable.images);
+        } else{
+            itemView.setBackgroundResource(R.drawable.images2);
+        }
 
         return new SpecialsAdapter.MyViewHolder(itemView);
     }
@@ -57,7 +67,4 @@ public class SpecialsAdapter extends RecyclerView.Adapter<SpecialsAdapter.MyView
         return specialList.size();
     }
 
-    public String getAdapterName(){
-        return "SpecialsAdapter";
-    }
 }

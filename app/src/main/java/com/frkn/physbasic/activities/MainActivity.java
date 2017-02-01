@@ -3,9 +3,14 @@ package com.frkn.physbasic.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -14,9 +19,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.frkn.physbasic.Chapter;
@@ -27,6 +34,7 @@ import com.frkn.physbasic.adapters.ChapterAdapter;
 import com.frkn.physbasic.adapters.SpecialsAdapter;
 import com.frkn.physbasic.adapters.TestAdapter;
 import com.frkn.physbasic.helper.DividerItemDecoration;
+import com.frkn.physbasic.helper.DownloaderAsync;
 import com.frkn.physbasic.helper.RecyclerTouchListener;
 
 import org.json.JSONArray;
@@ -102,6 +110,9 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
 
     private void setup() {
         loadSettings();
+        chapterAdapter.setAccountType(accountType);
+        testAdapter.setAccountType(accountType);
+        specialsAdapter.setAccountType(accountType);
         readInceptionJson();
         loadChaptersToRecycler();
 
@@ -247,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
                             if (accountType <= 1) {
                                 openUpgradeDialog(2, test.getId(), test.getTitle(), "2 TL");
                             } else {
-                                //openSelectedItem(2, test.getId(), 10);
+                                openSelectedItem(2, test.getId(), test.getImageCount(), test.getFileLength());
                             }
                         }
 
@@ -298,7 +309,7 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
                             if (accountType <= 2) {
                                 openUpgradeDialog(3, specials.getId(), specials.getTitle(), "3 TL");
                             } else {
-                                //openSelectedItem(3, specials.getId(), 10);
+                                openSelectedItem(2, specials.getId(), specials.getImageCount(), specials.getFileLength());
                             }
                         }
 
@@ -355,6 +366,15 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         accountType = _accountType;
         Log.d("onFinishBuying", "accountType: " + accountType);
         saveSettings();
+        chapterAdapter.setAccountType(accountType);
+        testAdapter.setAccountType(accountType);
+        specialsAdapter.setAccountType(accountType);
+        if(_type == 1)
+            loadChaptersToRecycler();
+        else if(_type == 2)
+            loadTestsToRecycler();
+        else if(_type == 3)
+            loadSpecialsToRecycler();
     }
 
 
@@ -394,9 +414,71 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
             case R.id.option_upgrade:
                 //openUpgradeDialog();
                 return true;
+            case R.id.option_güncelle:
+                if(isOnline()) {
+                    reloadInception();
+                } else{
+                    String msg = "No connection!";
+                    showSnackBarMessage(msg);
+                }
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void reloadInception() {
+        Log.d("SplashActivity", "reloadInception()");
+        download_inception_json();
+    }
+
+    DownloaderAsync.OnTaskCompleted onTaskCompleted = new DownloaderAsync.OnTaskCompleted() {
+        @Override
+        public void onTaskCompleted(String response) {
+            Log.d("SplashActivity", "onTaskCompleted: " + response);
+            readInceptionJson();
+            loadChaptersToRecycler();
+        }
+    };
+
+    public void download_inception_json() {
+        Log.d("Functions", "download_inception_json()..");
+        String URL = "https://www.dropbox.com/s/u6q6uno2ro50mv4/inception.json?dl=1";
+        DownloaderAsync downloaderAsync = new DownloaderAsync();
+        downloaderAsync.setContext(MainActivity.this);
+        downloaderAsync.setListener(onTaskCompleted);
+        downloaderAsync.setProcessMessage("Downloading inception json..");
+        downloaderAsync.setParentFolderName(null);
+        downloaderAsync.setFileName("inception");
+        downloaderAsync.setFileExtension(".json");
+        downloaderAsync.setFileLength(2607);
+        if (isOnline()) {
+            Log.d("isOnline", "Your are online. Now can start download");
+            downloaderAsync.execute(URL);
+        } else{
+            Toast.makeText(getApplicationContext(), "No connection", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showSnackBarMessage(String msg){
+        Snackbar snackbar = Snackbar
+                .make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG);
+        View snackbarView = snackbar.getView();
+        snackbarView.setBackgroundColor(Color.DKGRAY);
+        TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextColor(Color.RED);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+            textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        else
+            textView.setGravity(Gravity.CENTER_HORIZONTAL);
+        snackbar.show();
+    }
+
+
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
 }

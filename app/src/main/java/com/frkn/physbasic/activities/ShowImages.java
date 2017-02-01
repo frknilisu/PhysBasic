@@ -15,9 +15,11 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageSwitcher;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.frkn.physbasic.R;
@@ -35,7 +37,8 @@ public class ShowImages extends AppCompatActivity {
 
     public final static String EXTRA_MESSAGE = "com.frkn.physbasic.MESSAGE";
     ImageSwitcher imageSwitcher = null;
-    Button prev, next;
+    ImageButton prev, next;
+    TextView txt;
     int currImage = 1;
     int animInDuration = 800;
     int animOutDuration = 500;
@@ -86,8 +89,9 @@ public class ShowImages extends AppCompatActivity {
 
     private void initializeImageSwitcher() {
         imageSwitcher = (ImageSwitcher) findViewById(R.id.imageSwitcher);
-        prev = (Button) findViewById(R.id.previousImage);
-        next = (Button) findViewById(R.id.nextImage);
+        prev = (ImageButton) findViewById(R.id.previousImage);
+        next = (ImageButton) findViewById(R.id.nextImage);
+        txt = (TextView) findViewById(R.id.pageNumberText);
         imageSwitcher.setFactory(new ViewSwitcher.ViewFactory() {
             @Override
             public View makeView() {
@@ -175,6 +179,7 @@ public class ShowImages extends AppCompatActivity {
     private void setCurrentImage() {
         try {
             //  /data/user/0/com.frkn.physbasic/files/chapter/1
+            txt.setText(currImage + " / " + imageCount);
             InputStream is = new FileInputStream(new File(this.getFilesDir(), typeAsString + "/xx" + id + "/img" + currImage + ".jpg"));
             imageSwitcher.setImageDrawable(getDrawableForIns(is));
         } catch (FileNotFoundException e) {

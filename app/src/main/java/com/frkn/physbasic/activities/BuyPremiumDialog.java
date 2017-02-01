@@ -14,7 +14,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.frkn.physbasic.R;
 import com.frkn.physbasic.util.IabHelper;
 import com.frkn.physbasic.util.IabResult;
@@ -32,9 +31,9 @@ public class BuyPremiumDialog extends DialogFragment implements View.OnClickList
 
     // SKUs for our products: the premium upgrade (non-consumable) and gas (consumable)
     private String SKU_ITEM = "";
-    private static final String SKU_BRONZE = "bronze";
-    private static final String SKU_SILVER = "silver";
-    private static final String SKU_GOLD = "gold";
+    private static final String SKU_STANDART = "standart";
+    private static final String SKU_PREMIUM = "premium";
+    private static final String SKU_VIP = "vip";
     private static final String SKU_TEST = "android.test.purchased";
 
     // (arbitrary) request code for the purchase flow
@@ -113,22 +112,22 @@ public class BuyPremiumDialog extends DialogFragment implements View.OnClickList
         btn3.setOnClickListener(this);
         btn4.setOnClickListener(this);
 
-        if(accountType == 3){
+        if (accountType == 3) {
             btn1.setEnabled(false);
             btn2.setEnabled(false);
             btn3.setEnabled(false);
             btn4.setEnabled(false);
-        } else if(accountType == 2){
+        } else if (accountType == 2) {
             btn1.setEnabled(true);
             btn2.setEnabled(false);
             btn3.setEnabled(false);
             btn4.setEnabled(true);
-        } else if(accountType == 1){
+        } else if (accountType == 1) {
             btn1.setEnabled(true);
             btn2.setEnabled(false);
             btn3.setEnabled(true);
             btn4.setEnabled(true);
-        } else if(accountType == 0){
+        } else if (accountType == 0) {
             btn1.setEnabled(true);
             btn2.setEnabled(true);
             btn3.setEnabled(true);
@@ -158,7 +157,7 @@ public class BuyPremiumDialog extends DialogFragment implements View.OnClickList
         }
     }
 
-    public void onBuyItemClick(){
+    public void onBuyItemClick() {
         Log.d(TAG, "onBuyItemClicked: launching purchase flow for upgrade => " + buyingThingType + " - " + id);
         SKU_ITEM = buyingThingType + ".item." + id;
         /* TODO: for security, generate your payload here for verification. See the comments on
@@ -170,8 +169,19 @@ public class BuyPremiumDialog extends DialogFragment implements View.OnClickList
                 mPurchaseFinishedListener, payload);
     }
 
-    public void onBuyBronzeClick(){
+    public void onBuyBronzeClick() {
         Log.d(TAG, "onBuyBronzeClicked: launching purchase flow for upgrade");
+        /* TODO: for security, generate your payload here for verification. See the comments on
+         *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
+         *        an empty string, but on a production app you should carefully generate this. */
+        String payload = "";
+
+        mHelper.launchPurchaseFlow(mainActivity, SKU_STANDART, RC_REQUEST,
+                mPurchaseFinishedListener, payload);
+    }
+
+    public void onBuySilverClick() {
+        Log.d(TAG, "onBuySilverClicked: launching purchase flow for upgrade");
         /* TODO: for security, generate your payload here for verification. See the comments on
          *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
          *        an empty string, but on a production app you should carefully generate this. */
@@ -181,25 +191,14 @@ public class BuyPremiumDialog extends DialogFragment implements View.OnClickList
                 mPurchaseFinishedListener, payload);
     }
 
-    public void onBuySilverClick(){
-        Log.d(TAG, "onBuySilverClicked: launching purchase flow for upgrade");
-        /* TODO: for security, generate your payload here for verification. See the comments on
-         *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
-         *        an empty string, but on a production app you should carefully generate this. */
-        String payload = "";
-
-        mHelper.launchPurchaseFlow(mainActivity, SKU_SILVER, RC_REQUEST,
-                mPurchaseFinishedListener, payload);
-    }
-
-    public void onBuyGoldClick(){
+    public void onBuyGoldClick() {
         Log.d(TAG, "onBuyGoldClicked: launching purchase flow for upgrade");
         /* TODO: for security, generate your payload here for verification. See the comments on
          *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
          *        an empty string, but on a production app you should carefully generate this. */
         String payload = "";
 
-        mHelper.launchPurchaseFlow(mainActivity, SKU_GOLD, RC_REQUEST,
+        mHelper.launchPurchaseFlow(mainActivity, SKU_VIP, RC_REQUEST,
                 mPurchaseFinishedListener, payload);
     }
 
@@ -233,7 +232,7 @@ public class BuyPremiumDialog extends DialogFragment implements View.OnClickList
             // Do we have the premium upgrade?
             Purchase testItem = inventory.getPurchase(SKU_TEST);
             //Purchase gold = inventory.getPurchase(SKU_GOLD);
-            if(testItem != null) {
+            if (testItem != null) {
                 Toast.makeText(getContext(), "You have TEST ITEM", Toast.LENGTH_SHORT).show();
                 mHelper.consumeAsync(inventory.getPurchase(SKU_TEST), mConsumeFinishedListener);
             }
@@ -270,7 +269,7 @@ public class BuyPremiumDialog extends DialogFragment implements View.OnClickList
                 Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
                 Toast.makeText(getContext(), "Purchase is premium upgrade. Congratulating user.", Toast.LENGTH_SHORT).show();
                 //mHelper.consumeAsync(purchase, mConsumeFinishedListener);
-                accountType = 1;
+                accountType = 2;
                 return;
             }
         }
@@ -292,8 +291,7 @@ public class BuyPremiumDialog extends DialogFragment implements View.OnClickList
                 // successfully consumed, so we apply the effects of the item in our
                 // game world's logic, which in our case means filling the gas tank a bit
                 Log.d(TAG, "Consumption successful. Provisioning.");
-            }
-            else {
+            } else {
                 complain("Error while consuming: " + result);
             }
             Log.d(TAG, "End consumption flow.");
@@ -362,8 +360,7 @@ public class BuyPremiumDialog extends DialogFragment implements View.OnClickList
             // not handled, so handle it ourselves (here's where you'd
             // perform any handling of activity results not related to in-app
             // billing...
-        }
-        else {
+        } else {
             Log.d(TAG, "onActivityResult handled by IABUtil.");
             Log.d(TAG, "Destroying helper.");
             if (mHelper != null) {
@@ -380,7 +377,7 @@ public class BuyPremiumDialog extends DialogFragment implements View.OnClickList
         }
     }
 
-    public interface BuyPremiumListener{
+    public interface BuyPremiumListener {
         void onFinishBuying(int _accountType, int _type, int _id);
     }
 

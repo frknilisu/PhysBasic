@@ -12,6 +12,9 @@ public class Test {
     private int id;
     private int imageId;
     private String title, definition;
+    private int imageCount;
+    private int fileLength;
+    private String link;
 
 
     public Test(JSONObject jsonObject) {
@@ -20,6 +23,9 @@ public class Test {
             this.imageId = Integer.parseInt(jsonObject.getString("imageId"));
             this.definition = jsonObject.getString("definition");
             this.title = jsonObject.getString("title");
+            this.imageCount = jsonObject.getInt("imageCount");
+            this.fileLength = jsonObject.getInt("fileLength");
+            this.link = jsonObject.getString("link");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -39,5 +45,17 @@ public class Test {
 
     public String getDefinition() {
         return definition;
+    }
+
+    public int getImageCount() {
+        return imageCount;
+    }
+
+    public int getFileLength() {
+        return fileLength;
+    }
+
+    public String getLink() {
+        return link;
     }
 }

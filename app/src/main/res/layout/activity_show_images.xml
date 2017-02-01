@@ -1,44 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingLeft="2dp"
     android:paddingRight="2dp"
     android:orientation="vertical"
-    android:weightSum="10"
-    android:background="#000000">
+    android:background="@drawable/images">
 
 
     <ImageSwitcher
         android:id="@+id/imageSwitcher"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_weight="9"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"/>
-
-    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/layout1"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="true"/>
+
+    <RelativeLayout
+        android:id="@+id/layout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_weight="1"
-        android:weightSum="2">
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="@color/black">
 
-        <Button
+        <ImageButton
             android:id="@+id/previousImage"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Previous"
-            android:enabled="false"/>
+            app:srcCompat="@drawable/ic_skip_previous"
+            android:enabled="false"
+            android:layout_toLeftOf="@+id/pageNumberText"/>
 
-        <Button
+        <TextView
+            android:id="@+id/pageNumberText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textAlignment="center"
+            android:layout_centerInParent="true"/>
+
+        <ImageButton
             android:id="@+id/nextImage"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Next"
-            android:enabled="false"/>
+            app:srcCompat="@drawable/ic_skip_next"
+            android:enabled="false"
+            android:layout_toRightOf="@+id/pageNumberText"/>
 
-    </LinearLayout>
-</LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

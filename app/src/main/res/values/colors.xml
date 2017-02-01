@@ -22,6 +22,17 @@
     <color name="blue_grey_700">#455A64</color>
     <color name="blue_grey_800">#37474F</color>
     <color name="blue_grey_900">#263238</color>
+
+    <color name="active_item_background">@color/white</color>
+    <color name="active_item_title">@color/black</color>
+    <color name="active_item_definition">@color/black</color>
+
+    <color name="passive_item_background">@color/black</color>
+    <color name="passive_item_title">@color/white</color>
+    <color name="passive_item_definition">@color/white</color>
+
+
+    <color name="status_bar">#08cad6</color>
 </resources>
 
 
