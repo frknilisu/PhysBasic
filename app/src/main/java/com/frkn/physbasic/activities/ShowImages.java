@@ -1,12 +1,9 @@
 package com.frkn.physbasic.activities;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
@@ -14,7 +11,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageSwitcher;
 import android.widget.ImageView;
@@ -23,7 +19,7 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.frkn.physbasic.R;
-import com.frkn.physbasic.helper.DownloaderAsync;
+import com.frkn.physbasic.functions.DownloaderAsync;
 
 import org.json.JSONException;
 
@@ -40,8 +36,8 @@ public class ShowImages extends AppCompatActivity {
     ImageButton prev, next;
     TextView txt;
     int currImage = 1;
-    int animInDuration = 800;
-    int animOutDuration = 500;
+    int animInDuration = 500;
+    int animOutDuration = 300;
     String alpha = "1.0";
 
     int type, id, imageCount, fileLength;
@@ -217,13 +213,10 @@ public class ShowImages extends AppCompatActivity {
         downloaderAsync.setFileName("xx" + id);
         downloaderAsync.setFileExtension(".zip");
         downloaderAsync.setFileLength(fileLength);
-        if (isOnline()) {
-            Log.d("isOnline", "Your are online. Now can start download");
-            downloaderAsync.execute(URL);
-        }
+        downloaderAsync.execute(URL);
     }
 
-    DownloaderAsync.OnTaskCompleted onTaskCompleted = new DownloaderAsync.OnTaskCompleted() {
+    DownloaderAsync.DownloadListener onTaskCompleted = new DownloaderAsync.DownloadListener() {
         @Override
         public void onTaskCompleted(String response) {
             Log.d("ShowImages", "onTaskCompleted: " + response);
@@ -231,12 +224,11 @@ public class ShowImages extends AppCompatActivity {
             updateUi();
             setButtonsClick();
         }
-    };
 
-    public boolean isOnline() {
-        ConnectivityManager cm =
-                (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
-    }
+        @Override
+        public void onTaskFailed(String response) {
+            Log.d("ShowImages", "onTaskFailed: " + response);
+            finish();
+        }
+    };
 }

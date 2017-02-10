@@ -134,7 +134,7 @@ public class BuyPremiumDialog extends DialogFragment implements View.OnClickList
             btn4.setEnabled(true);
         }
 
-        getDialog().setTitle("Buy Premium");
+        getDialog().setTitle("Upgrade Account");
         return rootView;
     }
 

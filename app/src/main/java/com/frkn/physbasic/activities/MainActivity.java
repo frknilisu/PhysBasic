@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -24,7 +22,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.frkn.physbasic.Chapter;
 import com.frkn.physbasic.R;
@@ -33,8 +30,8 @@ import com.frkn.physbasic.Test;
 import com.frkn.physbasic.adapters.ChapterAdapter;
 import com.frkn.physbasic.adapters.SpecialsAdapter;
 import com.frkn.physbasic.adapters.TestAdapter;
+import com.frkn.physbasic.functions.DownloaderAsync;
 import com.frkn.physbasic.helper.DividerItemDecoration;
-import com.frkn.physbasic.helper.DownloaderAsync;
 import com.frkn.physbasic.helper.RecyclerTouchListener;
 
 import org.json.JSONArray;
@@ -58,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
 
 
     public static JSONObject inceptionJson = null;
+    boolean updateFlag = false;
     int chaptersCount, testsCount, specialsCount;
 
     private List<Chapter> chapterList = new ArrayList<>();
@@ -114,6 +112,9 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         testAdapter.setAccountType(accountType);
         specialsAdapter.setAccountType(accountType);
         readInceptionJson();
+        loadChapterList();
+        loadTestList();
+        loadSpecialList();
         loadChaptersToRecycler();
 
         bottomNavigationView.setOnNavigationItemSelectedListener(
@@ -159,7 +160,6 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
             jsonArray = inceptionJson.getJSONArray("specials");
             specialsCount = jsonArray.length();
         } catch (FileNotFoundException e) {
-            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -171,8 +171,12 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
 
     }
 
-    private void loadChapterList() {
+    private boolean loadChapterList() {
         Log.d("setup", "loadChapterList()..");
+        if(!updateFlag && !chapterList.isEmpty()){
+            return false;
+        }
+
         chapterList.clear();
         try {
             JSONArray jArray = inceptionJson.getJSONArray("chapters");
@@ -182,12 +186,16 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return true;
     }
 
     private void loadChaptersToRecycler() {
-        loadChapterList();
+        boolean bchange = loadChapterList();
+        if(bchange) {
+            chapterAdapter.notifyDataSetChanged();
+        }
         recyclerView.setAdapter(chapterAdapter);
-        chapterAdapter.notifyDataSetChanged();
+
         if (currentTouchListenerType == 1)
             return;
 
@@ -222,8 +230,12 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         }
     }
 
-    private void loadTestList() {
+    private boolean loadTestList() {
         Log.d("setup", "loadTestList()..");
+        if(!updateFlag && !testList.isEmpty()){
+            return false;
+        }
+
         testList.clear();
         try {
             JSONArray jArray = inceptionJson.getJSONArray("tests");
@@ -233,12 +245,16 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return true;
     }
 
     private void loadTestsToRecycler() {
-        loadTestList();
+        boolean bchange = loadTestList();
+        if(bchange) {
+            testAdapter.notifyDataSetChanged();
+        }
         recyclerView.setAdapter(testAdapter);
-        testAdapter.notifyDataSetChanged();
+
         if (currentTouchListenerType == 2)
             return;
 
@@ -273,8 +289,12 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         }
     }
 
-    private void loadSpecialList() {
+    private boolean loadSpecialList() {
         Log.d("setup", "loadSpecialList()..");
+        if(!updateFlag && !specialsList.isEmpty()){
+            return false;
+        }
+
         specialsList.clear();
         try {
             JSONArray jArray = inceptionJson.getJSONArray("specials");
@@ -284,12 +304,16 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return true;
     }
 
     private void loadSpecialsToRecycler() {
-        loadSpecialList();
+        boolean bchange = loadSpecialList();
+        if(bchange) {
+            specialsAdapter.notifyDataSetChanged();
+        }
         recyclerView.setAdapter(specialsAdapter);
-        specialsAdapter.notifyDataSetChanged();
+
         if (currentTouchListenerType == 3)
             return;
 
@@ -369,11 +393,12 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         chapterAdapter.setAccountType(accountType);
         testAdapter.setAccountType(accountType);
         specialsAdapter.setAccountType(accountType);
-        if(_type == 1)
+        updateFlag = true;
+        if (_type == 1)
             loadChaptersToRecycler();
-        else if(_type == 2)
+        else if (_type == 2)
             loadTestsToRecycler();
-        else if(_type == 3)
+        else if (_type == 3)
             loadSpecialsToRecycler();
     }
 
@@ -389,7 +414,6 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         settings = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         editor = settings.edit();
         editor.putInt("accountType", accountType);
-        editor.putBoolean("firstTime", false);
         editor.commit();
     }
 
@@ -412,15 +436,10 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.option_upgrade:
-                //openUpgradeDialog();
+                openUpgradeDialog(-1, -1, "", "");
                 return true;
             case R.id.option_güncelle:
-                if(isOnline()) {
-                    reloadInception();
-                } else{
-                    String msg = "No connection!";
-                    showSnackBarMessage(msg);
-                }
+                reloadInception();
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -431,12 +450,23 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         download_inception_json();
     }
 
-    DownloaderAsync.OnTaskCompleted onTaskCompleted = new DownloaderAsync.OnTaskCompleted() {
+    DownloaderAsync.DownloadListener onTaskCompleted = new DownloaderAsync.DownloadListener() {
         @Override
         public void onTaskCompleted(String response) {
-            Log.d("SplashActivity", "onTaskCompleted: " + response);
+            Log.d("MainActivity", "onTaskCompleted: " + response);
+            updateFlag = true;
             readInceptionJson();
+            loadChapterList();
+            loadTestList();
+            loadSpecialList();
+            updateFlag = false;
             loadChaptersToRecycler();
+        }
+
+        @Override
+        public void onTaskFailed(String response) {
+            Log.d("MainActivity", "onTaskFailed: " + response);
+            showSnackBarMessage("Error: " + response);
         }
     };
 
@@ -451,15 +481,11 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         downloaderAsync.setFileName("inception");
         downloaderAsync.setFileExtension(".json");
         downloaderAsync.setFileLength(2607);
-        if (isOnline()) {
-            Log.d("isOnline", "Your are online. Now can start download");
-            downloaderAsync.execute(URL);
-        } else{
-            Toast.makeText(getApplicationContext(), "No connection", Toast.LENGTH_SHORT).show();
-        }
+        downloaderAsync.execute(URL);
+
     }
 
-    private void showSnackBarMessage(String msg){
+    private void showSnackBarMessage(String msg) {
         Snackbar snackbar = Snackbar
                 .make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG);
         View snackbarView = snackbar.getView();
@@ -471,14 +497,6 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         else
             textView.setGravity(Gravity.CENTER_HORIZONTAL);
         snackbar.show();
-    }
-
-
-    public boolean isOnline() {
-        ConnectivityManager cm =
-                (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
 }

@@ -1,4 +1,4 @@
-package com.frkn.physbasic.helper;
+package com.frkn.physbasic.functions;
 
 import android.app.Activity;
 import android.content.Context;

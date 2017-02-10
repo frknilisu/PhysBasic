@@ -1,7 +1,6 @@
 package com.frkn.physbasic.activities;
 
 import android.app.Activity;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.pdf.PdfRenderer;
@@ -47,7 +46,7 @@ public class ShowChapter extends Activity implements View.OnClickListener {
 
         next = (Button) findViewById(R.id.next);
         previous = (Button) findViewById(R.id.previous);
-        mImageView = (ImageView) findViewById(R.id.image);
+        mImageView = (ImageView) findViewById(R.id.item_icon);
 
         next.setOnClickListener(this);
         previous.setOnClickListener(this);

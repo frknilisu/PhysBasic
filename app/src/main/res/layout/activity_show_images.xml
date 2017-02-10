@@ -6,7 +6,7 @@
     android:paddingLeft="2dp"
     android:paddingRight="2dp"
     android:orientation="vertical"
-    android:background="@drawable/images">
+    android:background="#1181B7">
 
 
     <ImageSwitcher
@@ -23,8 +23,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:background="@color/black">
+        android:layout_centerHorizontal="true">
 
         <ImageButton
             android:id="@+id/previousImage"

@@ -17,19 +17,21 @@ import java.util.List;
  */
 
 public class SpecialsAdapter extends RecyclerView.Adapter<SpecialsAdapter.MyViewHolder> {
-    
+
     private List<Specials> specialList;
     private int accountType;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public ImageView image;
+        public ImageView icon_image;
         public TextView title, definiton;
+        public ImageView lock_image;
 
         public MyViewHolder(View view) {
             super(view);
-            image = (ImageView) view.findViewById(R.id.image);
-            title = (TextView) view.findViewById(R.id.title);
-            definiton = (TextView) view.findViewById(R.id.definition);
+            icon_image = (ImageView) view.findViewById(R.id.item_icon);
+            title = (TextView) view.findViewById(R.id.item_title);
+            definiton = (TextView) view.findViewById(R.id.item_definition);
+            lock_image = (ImageView) view.findViewById(R.id.item_status);
         }
     }
 
@@ -37,7 +39,7 @@ public class SpecialsAdapter extends RecyclerView.Adapter<SpecialsAdapter.MyView
         this.specialList = specialList;
     }
 
-    public void setAccountType(int _accountType){
+    public void setAccountType(int _accountType) {
         this.accountType = _accountType;
     }
 
@@ -45,11 +47,6 @@ public class SpecialsAdapter extends RecyclerView.Adapter<SpecialsAdapter.MyView
     public SpecialsAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_row, parent, false);
-        if(accountType  == 3){
-            itemView.setBackgroundResource(R.drawable.images);
-        } else{
-            itemView.setBackgroundResource(R.drawable.images2);
-        }
 
         return new SpecialsAdapter.MyViewHolder(itemView);
     }
@@ -57,9 +54,14 @@ public class SpecialsAdapter extends RecyclerView.Adapter<SpecialsAdapter.MyView
     @Override
     public void onBindViewHolder(SpecialsAdapter.MyViewHolder holder, int position) {
         Specials special = specialList.get(position);
-        holder.image.setImageResource(special.getImageId());
+        holder.icon_image.setImageResource(special.getImageId());
         holder.title.setText(special.getTitle());
         holder.definiton.setText(special.getDefinition());
+        if (accountType == 3) {
+            holder.lock_image.setImageResource(R.drawable.ic_lock_open);
+        } else {
+            holder.lock_image.setImageResource(R.drawable.ic_lock);
+        }
     }
 
     @Override

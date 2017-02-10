@@ -4,13 +4,15 @@
         android:id="@+id/option_upgrade"
         android:orderInCategory="1"
         android:title="Upgrade"
-        app:showAsAction="never" />
+        app:showAsAction="always"
+        android:icon="@drawable/ic_lock_outline"/>
 
     <item
         android:id="@+id/option_güncelle"
         android:orderInCategory="2"
         android:title="Güncelle"
-        app:showAsAction="never" />
+        app:showAsAction="always"
+        android:icon="@drawable/ic_sync"/>
 
     <item
         android:id="@+id/option_about"

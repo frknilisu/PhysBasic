@@ -3,16 +3,17 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="custom_theme_color">#b0b0ff</color>
 
-    <color name="toolbarTitleTextColor">#ffffff</color>
-    <color name="toolbarColor">#000000</color>
+    <color name="toolbarTitleTextColor">#000000</color>
     <color name="contentMainColor">#797D7F</color>
     <color name="listRowColor">#2E4053</color>
     <color name="titleColor">#F4F6F7</color>
     <color name="definitonColor">#16A085</color>
 
-
+    <color name="grey_black_1">#353535</color>
+    <color name="grey_black_2">#6C6C6C</color>
+    <color name="white_2">#F9F9F9</color>
+    <color name="white_3">#C6C6C6</color>
 
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
@@ -23,16 +24,16 @@
     <color name="blue_grey_800">#37474F</color>
     <color name="blue_grey_900">#263238</color>
 
-    <color name="active_item_background">@color/white</color>
-    <color name="active_item_title">@color/black</color>
-    <color name="active_item_definition">@color/black</color>
-
-    <color name="passive_item_background">@color/black</color>
-    <color name="passive_item_title">@color/white</color>
-    <color name="passive_item_definition">@color/white</color>
+    <color name="item_title">#464C53</color>
+    <color name="item_definition">#9EA5B2</color>
 
 
     <color name="status_bar">#08cad6</color>
+
+    <color name="fragment_upgrade_background_color">@color/white</color>
+    <color name="fragment_upgrade_item_text_color">#757575</color>
+    <color name="fragment_upgrade_item_definition_color">#C6C6C6</color>
+    <color name="fragment_upgrade_button_color">#7986CB</color>
 </resources>
 
 

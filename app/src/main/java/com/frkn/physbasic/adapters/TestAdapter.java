@@ -22,14 +22,16 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.MyViewHolder> 
     private int accountType;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public ImageView image;
+        public ImageView icon_image;
         public TextView title, definiton;
+        public ImageView lock_image;
 
         public MyViewHolder(View view) {
             super(view);
-            image = (ImageView) view.findViewById(R.id.image);
-            title = (TextView) view.findViewById(R.id.title);
-            definiton = (TextView) view.findViewById(R.id.definition);
+            icon_image = (ImageView) view.findViewById(R.id.item_icon);
+            title = (TextView) view.findViewById(R.id.item_title);
+            definiton = (TextView) view.findViewById(R.id.item_definition);
+            lock_image = (ImageView) view.findViewById(R.id.item_status);
         }
     }
 
@@ -37,7 +39,7 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.MyViewHolder> 
         this.testList = testList;
     }
 
-    public void setAccountType(int _accountType){
+    public void setAccountType(int _accountType) {
         this.accountType = _accountType;
     }
 
@@ -45,11 +47,6 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.MyViewHolder> 
     public TestAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_row, parent, false);
-        if(accountType >= 2){
-            itemView.setBackgroundResource(R.drawable.images);
-        } else{
-            itemView.setBackgroundResource(R.drawable.images2);
-        }
 
         return new TestAdapter.MyViewHolder(itemView);
     }
@@ -57,9 +54,14 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.MyViewHolder> 
     @Override
     public void onBindViewHolder(TestAdapter.MyViewHolder holder, int position) {
         Test test = testList.get(position);
-        holder.image.setImageResource(test.getImageId());
+        holder.icon_image.setImageResource(test.getImageId());
         holder.title.setText(test.getTitle());
         holder.definiton.setText(test.getDefinition());
+        if (accountType >= 2) {
+            holder.lock_image.setImageResource(R.drawable.ic_lock_open);
+        } else {
+            holder.lock_image.setImageResource(R.drawable.ic_lock);
+        }
     }
 
     @Override
@@ -67,7 +69,4 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.MyViewHolder> 
         return testList.size();
     }
 
-    public String getAdapterName(){
-        return "TestAdapter";
-    }
 }

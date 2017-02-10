@@ -1,4 +1,4 @@
-package com.frkn.physbasic.helper;
+package com.frkn.physbasic.functions;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -27,13 +27,17 @@ public class DownloaderAsync extends AsyncTask<String, String, String> {
     ProgressDialog mProgressDialog;
 
     Context context;
-    OnTaskCompleted listener;
+    DownloadListener listener;
     String processMessage;
     int fileLength = 0;
     String parentFolderName;
     String fileName, fileExtension;
 
     String srcPath, destPath;
+
+    int timeout = 10000;
+    boolean downloadIsOk = false;
+    String taskMessage;
 
     public DownloaderAsync() {
     }
@@ -61,8 +65,8 @@ public class DownloaderAsync extends AsyncTask<String, String, String> {
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
             //urlConnection.setDoOutput(true);
-            urlConnection.setConnectTimeout(10000);
-            urlConnection.setReadTimeout(10000);
+            urlConnection.setConnectTimeout(timeout);
+            urlConnection.setReadTimeout(timeout);
             //urlConnection.setChunkedStreamingMode(100);
             urlConnection.connect();
             // show progress bar 0-100%
@@ -107,8 +111,13 @@ public class DownloaderAsync extends AsyncTask<String, String, String> {
             outputStream.close();
             inputStream.close();
 
+            downloadIsOk = true;
+            taskMessage = "Success: Download completed.";
+
         } catch (Exception e) {
             Log.e("Error: ", e.getMessage());
+            downloadIsOk = false;
+            taskMessage = e.getMessage();
         }
         return null;
     }
@@ -122,23 +131,30 @@ public class DownloaderAsync extends AsyncTask<String, String, String> {
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
         mProgressDialog.dismiss();
-        Toast.makeText(context, "Success: Download completed.", Toast.LENGTH_SHORT).show();
-        boolean flag = false;
-        if (srcPath != null && destPath != null)
-            flag = unzip(srcPath, destPath);
-        Toast.makeText(context, "Unzipping: " + String.valueOf(flag), Toast.LENGTH_SHORT).show();
-        listener.onTaskCompleted("Success: Download completed.");
+        if (downloadIsOk) {
+            Toast.makeText(context, taskMessage, Toast.LENGTH_SHORT).show();
+            boolean flag = false;
+            if (srcPath != null && destPath != null)
+                flag = unzip(srcPath, destPath);
+            Toast.makeText(context, "Unzipping: " + String.valueOf(flag), Toast.LENGTH_SHORT).show();
+            listener.onTaskCompleted(taskMessage);
+        } else {
+            Toast.makeText(context, "Error: Download failed.", Toast.LENGTH_SHORT).show();
+            listener.onTaskFailed(taskMessage);
+        }
     }
 
     @Override
     protected void onCancelled(String result) {
         super.onCancelled(result);
         Toast.makeText(context, "Error: Download failed.", Toast.LENGTH_SHORT).show();
-        listener.onTaskCompleted("Error: Download failed.");
+        listener.onTaskFailed("Error: Download failed: " + result);
     }
 
-    public interface OnTaskCompleted {
+    public interface DownloadListener {
         void onTaskCompleted(String response);
+
+        void onTaskFailed(String response);
     }
 
     private final static int BUFFER_SIZE = 2048;
@@ -219,7 +235,7 @@ public class DownloaderAsync extends AsyncTask<String, String, String> {
         this.context = context;
     }
 
-    public void setListener(OnTaskCompleted listener) {
+    public void setListener(DownloadListener listener) {
         this.listener = listener;
     }
 

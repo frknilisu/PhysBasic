@@ -37,46 +37,13 @@
         android:textStyle="normal|italic"
         android:textAlignment="center" />
 
-    <Button
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/ic_sync"
         android:layout_below="@+id/textView"
-        android:layout_alignLeft="@+id/textView"
-        android:layout_alignStart="@+id/textView"
-        android:layout_marginTop="56dp"
-        android:id="@+id/button2"
-        android:text="4.99"
-        android:textColor="#76FF03"
-        android:textSize="30sp"
-        android:layout_width="100dp"
-        android:layout_height="50dp"
-        android:background="@drawable/button_shape"
-        style="@style/MyButton"/>
-
-    <Button
-        android:text="Button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/button2"
-        android:layout_toRightOf="@+id/imageView"
-        android:layout_toEndOf="@+id/imageView"
-        android:id="@+id/button3"
-        android:background="?attr/selectableItemBackground"/>
-
-    <Button
-        android:text="Button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/button3"
-        android:layout_toLeftOf="@+id/button3"
-        android:layout_toStartOf="@+id/button3"
-        android:id="@+id/button4" />
-
-    <TextView
-        android:text="TextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="75dp"
-        android:id="@+id/textView2" />
+        android:layout_marginTop="25dp"
+        android:id="@+id/imageButton" />
 
 </RelativeLayout>

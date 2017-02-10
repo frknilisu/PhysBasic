@@ -7,13 +7,13 @@
     <string name="next">Next</string>
 
 
-    <string name="standart_text">Buy Standart</string>
-    <string name="premium_text">Buy Premium</string>
-    <string name="vip_text">Buy Vip</string>
+    <string name="standart_text">Standart</string>
+    <string name="premium_text">Premium</string>
+    <string name="vip_text">Vip</string>
 
-    <string name="standart_description">Standart Description</string>
-    <string name="premium_description">Premium Description</string>
-    <string name="vip_description">Vip Description</string>
+    <string name="standart_description">Standart Description\nRemove Ads</string>
+    <string name="premium_description">Premium Description\nRemove Ads</string>
+    <string name="vip_description">Vip Description\nRemove Ads</string>
 
     <string name="standart_price">10 TL</string>
     <string name="premium_price">20 TL</string>

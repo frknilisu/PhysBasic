@@ -1,7 +1,6 @@
 package com.frkn.physbasic.adapters;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,14 +24,16 @@ public class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.MyViewHo
     private int accountType = 0;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public ImageView image;
+        public ImageView icon_image;
         public TextView title, definiton;
+        public ImageView lock_image;
 
         public MyViewHolder(View view) {
             super(view);
-            image = (ImageView) view.findViewById(R.id.image);
-            title = (TextView) view.findViewById(R.id.title);
-            definiton = (TextView) view.findViewById(R.id.definition);
+            icon_image = (ImageView) view.findViewById(R.id.item_icon);
+            title = (TextView) view.findViewById(R.id.item_title);
+            definiton = (TextView) view.findViewById(R.id.item_definition);
+            lock_image = (ImageView) view.findViewById(R.id.item_status);
         }
     }
 
@@ -49,11 +50,6 @@ public class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.MyViewHo
 
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_row, parent, false);
-        /*if(viewType == 1 && accountType == 0) {
-            itemView.setBackgroundResource(R.drawable.images2);
-        } else{
-            itemView.setBackgroundResource(R.drawable.images);
-        }*/
 
         return new MyViewHolder(itemView);
     }
@@ -61,9 +57,14 @@ public class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.MyViewHo
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         Chapter chapter = chapterList.get(position);
-        holder.image.setImageResource(chapter.getImageId());
+        holder.icon_image.setImageResource(chapter.getImageId());
         holder.title.setText(chapter.getTitle());
         holder.definiton.setText(chapter.getDefinition());
+        if(accountType == 0 && chapter.isLock()) {
+            holder.lock_image.setImageResource(R.drawable.ic_lock);
+        } else{
+            holder.lock_image.setImageResource(R.drawable.ic_lock_open);
+        }
     }
 
     @Override

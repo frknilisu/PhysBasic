@@ -5,42 +5,68 @@
     android:layout_height="75dp"
     android:focusable="true"
     android:paddingLeft="16dp"
-    android:paddingRight="16dp"
     android:paddingTop="10dp"
     android:paddingBottom="10dp"
     android:clickable="true"
-    android:background="@drawable/layout_shape"
-    android:weightSum="5">
+    android:background="?attr/selectableItemBackground"
+    android:weightSum="1"
+    android:paddingRight="16dp">
 
     <ImageView
-        android:id="@+id/image"
+        android:id="@+id/item_icon"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"/>
+        android:layout_weight="0.2"
+        android:layout_gravity="center"/>
 
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="4"
-        android:paddingLeft="16dp">
+        android:layout_weight="0.7"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="8dp">
 
         <TextView
-            android:id="@+id/title"
+            android:id="@+id/item_title"
             android:textSize="16dp"
-            android:textColor="@color/active_item_title"
+            android:textColor="@color/item_title"
             android:textStyle="bold"
             android:layout_alignParentTop="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <TextView
-            android:id="@+id/definition"
-            android:layout_below="@id/title"
-            android:textColor="@color/active_item_definition"
+            android:id="@+id/item_definition"
+            android:layout_below="@id/item_title"
+            android:textColor="@color/item_definition"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
     </LinearLayout>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="#DEDEDE"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="0dp"
+        android:layout_weight="0.1"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_gravity="center|center_horizontal">
+
+        <ImageView
+            android:id="@+id/item_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|center_horizontal" />
+    </LinearLayout>
+
+
 </LinearLayout>
