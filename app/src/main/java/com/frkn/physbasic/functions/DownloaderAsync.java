@@ -42,7 +42,6 @@ public class DownloaderAsync extends AsyncTask<String, String, String> {
     public DownloaderAsync() {
     }
 
-
     @Override
     protected void onPreExecute() {
         super.onPreExecute();

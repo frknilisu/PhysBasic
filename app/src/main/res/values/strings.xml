@@ -6,6 +6,10 @@
     <string name="previous">Previous</string>
     <string name="next">Next</string>
 
+    <string name="title_tests">Tests</string>
+    <string name="title_chapters">All Chapters</string>
+    <string name="title_specials">Special Problems</string>
+
 
     <string name="standart_text">Standart</string>
     <string name="premium_text">Premium</string>

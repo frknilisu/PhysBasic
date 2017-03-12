@@ -1,13 +1,18 @@
 package com.frkn.physbasic.activities;
 
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -16,6 +21,7 @@ import android.widget.ImageSwitcher;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import com.frkn.physbasic.R;
@@ -36,14 +42,25 @@ public class ShowImages extends AppCompatActivity {
     ImageButton prev, next;
     TextView txt;
     int currImage = 1;
-    int animInDuration = 500;
-    int animOutDuration = 300;
+    int animInDuration = 300;
+    int animOutDuration = 100;
     String alpha = "1.0";
 
     int type, id, imageCount, fileLength;
     String typeAsString;
     String URL = null;
 
+
+    private static final int SWIPE_MIN_DISTANCE = 120;
+    //private static final int SWIPE_MAX_OFF_PATH = 250;
+    private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+    final GestureDetector gdt = new GestureDetector(new GestureListener());
+
+    Animation inRightToCenter;
+    Animation outCenterToLeft;
+
+    Animation inLeftToCenter;
+    Animation outCenterToRight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +101,12 @@ public class ShowImages extends AppCompatActivity {
     }
 
     private void initializeImageSwitcher() {
+        inRightToCenter = AnimationUtils.loadAnimation(this, R.anim.img_switch_in_rc);
+        outCenterToLeft = AnimationUtils.loadAnimation(this, R.anim.img_switch_out_cl);
+
+        inLeftToCenter = AnimationUtils.loadAnimation(this, R.anim.img_switch_in_lc);
+        outCenterToRight = AnimationUtils.loadAnimation(this, R.anim.img_switch_out_cr);
+
         imageSwitcher = (ImageSwitcher) findViewById(R.id.imageSwitcher);
         prev = (ImageButton) findViewById(R.id.previousImage);
         next = (ImageButton) findViewById(R.id.nextImage);
@@ -96,37 +119,63 @@ public class ShowImages extends AppCompatActivity {
                 imageView.setLayoutParams(new
                         ImageSwitcher.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT));
+
+                imageView.setOnTouchListener(new View.OnTouchListener() {
+                    public boolean onTouch(final View view, final MotionEvent event) {
+                        // TODO Auto-generated method stub
+                        gdt.onTouchEvent(event);
+                        //Log.i("Hello my Log 1","How dfgfd are you");
+                        return true;
+                    }
+                });
+
                 return imageView;
             }
         });
 
-        Animation out = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
+        /*Animation out = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
         Animation in = AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left);
         out.setDuration(animOutDuration);
         in.setDuration(animInDuration);
         imageSwitcher.setInAnimation(out);
         imageSwitcher.setInAnimation(in);
-        //imageSwitcher.setAlpha(Float.parseFloat(alpha));
+        imageSwitcher.setAlpha(Float.parseFloat(alpha));*/
+
+
     }
 
     private void setButtonsClick() {
         prev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                currImage--;
-                updateUi();
-                setCurrentImage();
+                goPreviousImage();
             }
         });
 
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                currImage++;
-                updateUi();
-                setCurrentImage();
+                goNextImage();
             }
         });
+    }
+
+    private void goPreviousImage(){
+        imageSwitcher.setInAnimation(inLeftToCenter);
+        imageSwitcher.setOutAnimation(outCenterToRight);
+
+        currImage--;
+        updateUi();
+        setCurrentImage();
+    }
+
+    private void goNextImage(){
+        imageSwitcher.setInAnimation(inRightToCenter);
+        imageSwitcher.setOutAnimation(outCenterToLeft);
+
+        currImage++;
+        updateUi();
+        setCurrentImage();
     }
 
     private void updateUi() {
@@ -231,4 +280,37 @@ public class ShowImages extends AppCompatActivity {
             finish();
         }
     };
+
+    private class GestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+                               float velocityY) {
+            if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE
+                    && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+
+                if(currImage < imageCount) {
+                    goNextImage();
+                }
+                return false; // Right to left
+            } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE
+                    && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+
+                if(currImage > 1) {
+                    goPreviousImage();
+                }
+                return false; // Left to right
+            }
+
+            /*if (e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE
+                    && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+                return false; // Bottom to top
+            } else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE
+                    && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+                return false; // Top to bottom
+            }*/
+
+            return false;
+        }
+
+    }
 }

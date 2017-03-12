@@ -77,9 +77,9 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
 
     /**
      * 0 => nothing show, just 3-4 chapter which come initially can be opened, other things are paid.
-     * 1 => bronz, all inception can be opened, but tests and special problems and tricks are paid.
-     * 2 => silver, all inception and tests can be opened, but special problems and tricks are paid.
-     * 3 => gold, everything can be opened
+     * 1 => standart, all chapters can be opened, but tests and special problems and tricks are paid.
+     * 2 => premium, all chapters and tests can be opened, but special problems and tricks are paid.
+     * 3 => vip, everything can be opened
      */
     private int accountType = 0;
 
@@ -117,6 +117,7 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
         loadSpecialList();
         loadChaptersToRecycler();
 
+        bottomNavigationView.getMenu().getItem(1).setChecked(true);
         bottomNavigationView.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
@@ -124,13 +125,13 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
                         switch (item.getItemId()) {
                             case R.id.action_tests:
                                 loadTestsToRecycler();
-                                break;
+                                return true;
                             case R.id.action_all_chapters:
                                 loadChaptersToRecycler();
-                                break;
+                                return true;
                             case R.id.action_specials_problems:
                                 loadSpecialsToRecycler();
-                                break;
+                                return true;
                         }
                         return false;
                     }
@@ -446,7 +447,7 @@ public class MainActivity extends AppCompatActivity implements BuyPremiumDialog.
     }
 
     private void reloadInception() {
-        Log.d("SplashActivity", "reloadInception()");
+        Log.d("SplashScreen", "reloadInception()");
         download_inception_json();
     }
 

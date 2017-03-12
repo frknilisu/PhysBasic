@@ -4,19 +4,19 @@
     <item
         android:id="@+id/action_tests"
         android:enabled="true"
-        android:icon="@drawable/ic_notifications_black"
-        android:title="Tests"
+        android:icon="@drawable/ic_home_black_24dp"
+        android:title="@string/title_tests"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_all_chapters"
         android:enabled="true"
-        android:icon="@drawable/ic_home_black"
-        android:title="All Chapters"
+        android:icon="@drawable/ic_dashboard_black_24dp"
+        android:title="@string/title_chapters"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_specials_problems"
         android:enabled="true"
-        android:icon="@drawable/ic_search_black"
-        android:title="Specials Problems"
+        android:icon="@drawable/ic_notifications_black_24dp"
+        android:title="@string/title_specials"
         app:showAsAction="ifRoom" />
 </menu>

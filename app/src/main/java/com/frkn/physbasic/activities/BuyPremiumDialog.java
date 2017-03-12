@@ -144,13 +144,13 @@ public class BuyPremiumDialog extends DialogFragment implements View.OnClickList
                 onBuyItemClick();
                 break;
             case R.id.buy_standart_button:
-                onBuyBronzeClick();
+                onBuyStandartClick();
                 break;
             case R.id.buy_premium_button:
-                onBuySilverClick();
+                onBuyPremiumClick();
                 break;
             case R.id.buy_vip_button:
-                onBuyGoldClick();
+                onBuyVipClick();
                 break;
             default:
                 break;
@@ -169,7 +169,7 @@ public class BuyPremiumDialog extends DialogFragment implements View.OnClickList
                 mPurchaseFinishedListener, payload);
     }
 
-    public void onBuyBronzeClick() {
+    public void onBuyStandartClick() {
         Log.d(TAG, "onBuyBronzeClicked: launching purchase flow for upgrade");
         /* TODO: for security, generate your payload here for verification. See the comments on
          *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
@@ -180,7 +180,7 @@ public class BuyPremiumDialog extends DialogFragment implements View.OnClickList
                 mPurchaseFinishedListener, payload);
     }
 
-    public void onBuySilverClick() {
+    public void onBuyPremiumClick() {
         Log.d(TAG, "onBuySilverClicked: launching purchase flow for upgrade");
         /* TODO: for security, generate your payload here for verification. See the comments on
          *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
@@ -191,7 +191,7 @@ public class BuyPremiumDialog extends DialogFragment implements View.OnClickList
                 mPurchaseFinishedListener, payload);
     }
 
-    public void onBuyGoldClick() {
+    public void onBuyVipClick() {
         Log.d(TAG, "onBuyGoldClicked: launching purchase flow for upgrade");
         /* TODO: for security, generate your payload here for verification. See the comments on
          *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
